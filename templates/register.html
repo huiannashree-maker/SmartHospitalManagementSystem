@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-lg border-0 mt-5">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h2 class="mb-0">Patient Registration</h2>
+                <small>Create your SmartCare account</small>
+            </div>
+            <div class="card-body p-4">
+                <form action="/register" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="John Doe" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" name="email" class="form-control" placeholder="name@example.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" name="confirm_password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2">Create Account</button>
+                </form>
+            </div>
+            <div class="card-footer text-center py-3 bg-white">
+                <p class="mb-0">Already have an account? <a href="/login" class="text-primary">Login here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-3 mb-4">
+        <div class="card bg-primary text-white p-4 mb-3 border-0 shadow-sm text-center">
+            <h6 class="small text-uppercase fw-bold opacity-75">Staff Count</h6>
+            <h2 class="fw-bold mb-0">{{ doctors|length }}</h2>
+        </div>
+
+        <div class="card bg-warning text-dark p-4 mb-3 border-0 shadow-sm text-center">
+            <h6 class="small text-uppercase fw-bold opacity-75">Pending Requests</h6>
+            <h2 class="fw-bold mb-0">{{ requests|length }}</h2>
+        </div>
+
+        <div class="card p-3 border-0 shadow-sm">
+            <h6 class="fw-bold text-secondary mb-3 small">System Actions</h6>
+            <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="window.print()">
+                <i class="bi bi-printer"></i> Print Staff List
+            </button>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm w-100">
+                <i class="bi bi-box-arrow-right"></i> Sign Out
+            </a>
+        </div>
+    </div>
+
+    <div class="col-lg-9">
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="mb-0 fw-bold text-warning"><i class="bi bi-bell-fill me-2"></i>Patient Requests to Approve</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small fw-bold text-uppercase">
+                            <tr>
+                                <th class="ps-4">Patient Details</th>
+                                <th>Age</th>
+                                <th>Condition</th>
+                                <th>Required Specialty</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in requests %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">{{ req.patient_name }}</div>
+                                    <small class="text-muted">ID: {{ req.patient_id }}</small>
+                                </td>
+                                <td>{{ req.patient_age }}</td>
+                                <td class="fw-semibold">{{ req.condition }}</td>
+                                <td><span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{ req.specialty }}</span></td>
+                                <td class="text-center">
+                                    <a href="/admin/handle_request/{{ req._id }}/accept" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">Accept</a>
+                                    <a href="/admin/handle_request/{{ req._id }}/reject" class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-1 shadow-sm">Reject</a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted small">
+                                    <i class="bi bi-check-circle fs-2 d-block mb-2 opacity-50"></i>
+                                    No pending requests found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-person-lines-fill me-2"></i>Medical Staff Directory</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small fw-bold text-uppercase">
+                            <tr>
+                                <th class="ps-4">Doctor Details</th>
+                                <th>Specialization</th>
+                                <th>Age</th>
+                                <th>Contact</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in doctors %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">{{ doc.name }}</div>
+                                    <small class="text-muted">{{ doc.email }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info-subtle text-info border border-info px-3 rounded-pill">
+                                        {{ doc.specialization or doc.spealization }}
+                                    </span>
+                                </td>
+                                <td>{{ doc.age or 'N/A' }}</td>
+                                <td>
+                                    <code class="text-dark small">
+                                        {{ doc.contact_number or doc.contact_details or doc.contact or 'No Contact' }}
+                                    </code>
+                                </td>
+                                <td class="text-center">
+                                    <a href="/admin/delete_doctor/{{ doc._id }}"
+                                       class="btn btn-sm btn-outline-danger px-3 rounded-pill shadow-sm"
+                                       onclick="return confirm('Remove this doctor from the staff directory?')">
+                                        Remove
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-person-plus-fill me-2"></i>Register New Staff Member</h6>
+            </div>
+            <div class="card-body bg-light-subtle">
+                <form action="/admin/add_doctor" method="POST" class="row g-2">
+                    <div class="col-md-3">
+                        <input type="text" name="name" class="form-control form-control-sm" placeholder="Full Name" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="email" name="email" class="form-control form-control-sm" placeholder="Email" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" name="specialty" class="form-control form-control-sm" placeholder="Specialization" required>
+                    </div>
+                    <div class="col-md-1">
+                        <input type="number" name="age" class="form-control form-control-sm" placeholder="Age">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" name="contact" class="form-control form-control-sm" placeholder="Contact #">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-success btn-sm w-100 fw-bold shadow-sm">
+                            <i class="bi bi-plus-lg me-1"></i> ADD STAFF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-info-subtle { background-color: #e1f5fe !important; }
+    .bg-secondary-subtle { background-color: #f8f9fa !important; }
+    .table thead th { letter-spacing: 0.5px; color: #6c757d; font-size: 0.7rem; }
+    .btn-sm { font-size: 0.8rem; }
+</style>
+{% endblock %}

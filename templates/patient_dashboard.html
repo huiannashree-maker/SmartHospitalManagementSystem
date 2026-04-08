@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row animate__animated animate__fadeIn">
+    <div class="col-12 mb-4">
+        <div class="card bg-primary text-white p-4 border-0 shadow-sm d-flex flex-row justify-content-between align-items-center" style="border-radius: 15px;">
+            <div>
+                <h3 class="mb-1 fw-bold">Welcome, {{ user.name if user.name else 'Patient' }}</h3>
+                <p class="mb-0 opacity-75">
+                    <i class="bi bi-calendar-event me-1"></i> Age: {{ user.age if user.age else 'N/A' }}
+                    <span class="mx-2">|</span>
+                    <i class="bi bi-shield-check me-1"></i> Status: <span class="badge bg-white text-primary rounded-pill">Active</span>
+                </p>
+            </div>
+            <i class="bi bi-person-circle" style="font-size: 3.5rem;"></i>
+        </div>
+    </div>
+
+    <div class="col-md-5 mb-4">
+        <div class="card shadow-sm border-0 h-100" style="border-radius: 15px;">
+            <div class="card-header bg-white py-3 border-bottom-0">
+                <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-clipboard2-pulse me-2"></i>Symptom Checker</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-4">Describe how you are feeling in detail. Our AI will match you with a specialist.</p>
+                <form method="POST">
+                    <div class="mb-3">
+                        <textarea name="symptoms" class="form-control border-light-subtle shadow-sm" rows="6"
+                                  placeholder="e.g. I have a persistent itch and red rashes on my skin..." required
+                                  style="border-radius: 12px; background-color: #f8f9fa;"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold py-3 shadow-sm" style="border-radius: 12px;">
+                        ANALYZE SYMPTOMS
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7 mb-4">
+        {% if result %}
+        <div class="card border-0 shadow-sm h-100 animate__animated animate__zoomIn" style="border-radius: 15px;">
+            <div class="card-header bg-success text-white py-3 border-bottom-0" style="border-radius: 15px 15px 0 0;">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-check2-circle me-2"></i>Analysis Completed</h5>
+            </div>
+            <div class="card-body p-4">
+                <label class="small text-uppercase fw-bold text-muted mb-1 ls-1">Estimated Condition</label>
+                <h2 class="fw-bold mb-4 text-dark">{{ result.condition }}</h2>
+
+                <div class="p-4 rounded-4 border-0 bg-light mb-4 shadow-sm">
+                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person-badge me-2"></i>Recommended Specialist</h6>
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h5 class="mb-0 fw-bold text-dark">{{ result.doctor_name }}</h5>
+                            <p class="mb-2 text-primary small fw-semibold">{{ result.doctor_specialty }}</p>
+                            <p class="mb-0 text-muted small"><i class="bi bi-telephone me-1"></i> Contact: {{ result.doctor_contact }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <a href="/reset_analysis" class="btn btn-outline-secondary px-4 py-2 fw-bold" style="border-radius: 10px;">Reset</a>
+                    <form action="/book_appointment" method="POST" class="flex-grow-1">
+                        <button type="submit" class="btn btn-success w-100 fw-bold py-2 shadow-sm" style="border-radius: 10px;">
+                            BOOK APPOINTMENT
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card border-dashed h-100 d-flex align-items-center justify-content-center p-5 bg-white text-muted text-center" style="border-radius: 15px;">
+            <div class="opacity-50">
+                <i class="bi bi-activity display-1 d-block mb-3 text-primary"></i>
+                <h5 class="fw-bold">No Analysis Yet</h5>
+                <p class="small mb-0">Submit your symptoms on the left to see <br> results and specialist recommendations.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-12 mt-2">
+        <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-clock-history me-2 text-primary"></i>My Booking History (DD-MM-YYYY)</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4 py-3">Date</th>
+                                <th>Estimated Condition</th>
+                                <th>Assigned Doctor</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in history %}
+                            <tr>
+                                <td class="ps-4 text-muted small">{{ item.date or 'Pending' }}</td>
+                                <td class="fw-bold text-dark">
+                                    {{ item.reason or item.condition or 'General Inquiry' }}
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">{{ item.doctor or 'To be Assigned' }}</div>
+                                    <small class="text-primary">{{ item.specialty }}</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill px-3 py-2
+                                        {% if item.status == 'approved' %}bg-success-subtle text-success border border-success
+                                        {% elif item.status == 'rejected' %}bg-danger-subtle text-danger border border-danger
+                                        {% else %}bg-warning-subtle text-warning border border-warning{% endif %}">
+                                        {{ item.status|upper }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <i class="bi bi-calendar-x d-block mb-2 fs-2 opacity-25"></i>
+                                    No previous appointments found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-dashed { border: 2px dashed #dee2e6 !important; }
+    .ls-1 { letter-spacing: 0.5px; }
+    .bg-success-subtle { background-color: #d1e7dd !important; }
+    .bg-danger-subtle { background-color: #f8d7da !important; }
+    .bg-warning-subtle { background-color: #fff3cd !important; }
+    .ls-1 { letter-spacing: 1px; }
+</style>
+{% endblock %}
